@@ -1,0 +1,60 @@
+{
+  "bot_token": "5346182572:AAFGj1wXBIYLsQcB052e38u2pd6qkvxgeXY",
+  "channels": [
+    {
+      "id": 1,
+      "name": "1-Kanal",
+      "link": "https://t.me/+1Ac0rG7osfg5NGFi",
+      "chat_id": -1003380363288
+    },
+    {
+      "id": 2,
+      "name": "2-Kanal",
+      "link": "https://t.me/+lU7--JaQaFo3MTAy",
+      "chat_id": -1003409493204
+    }
+  ],
+  "apps": [
+    {
+      "id": 1,
+      "name": "🟢Linebet",
+      "info": "❗️Bot to'liq ishlashi uchun Eslatma: \n Agar shart to'liq bajarilmagan bo'lsa bot to'g'ri ishlamaydi. Vzlomlangan 🟢Linebet ilovasidan foydalanish shart👇 \n\n1. Pastdagi tugma orqali vzlomlangan 🟢Linebet ilovasini yuklab oling. \n\n2. Vzlom Linebet ilovasida TOXA promokodi orqali yangidan ro'yhatdan o'ting.",
+      "link": "https://t.me/toxa_bonus/170"
+    },
+    {
+      "id": 2,
+      "name": "🟡Melbet",
+      "info": "❗️Bot to'liq ishlashi uchun Eslatma: \n Agar shart to'liq bajarilmagan bo'lsa bot to'g'ri ishlamaydi. Vzlomlangan 🟡Melbet ilovasidan foydalanish shart👇 \n\n1. Pastdagi tugma orqali vzlomlangan 🟡Melbet  ilovasini yuklab oling. \n\n2. Vzlom Melbet ilovasida TOXA promokodi orqali yangidan ro'yhatdan o'ting.",
+      "link": "https://t.me/toxa_bonus/168"
+    },
+    {
+      "id": 3,
+      "name": "🟣Winwin",
+      "info": "❗️Bot to'liq ishlashi uchun Eslatma: \n Agar shart to'liq bajarilmagan bo'lsa bot to'g'ri ishlamaydi. Vzlomlangan 🟣Winwin ilovasidan foydalanish shart👇 \n\n1. Pastdagi tugma orqali vzlomlangan 🟣Winwin ilovasini yuklab oling. \n\n2. Vzlom Winwin ilovasida TOXA promokodi orqali yangidan ro'yhatdan o'ting.",
+      "link": "https://t.me/toxa_bonus/171"
+    },
+    {
+      "id": 4,
+      "name": "🟤Spinbetter",
+      "info": "❗️Bot to'liq ishlashi uchun Eslatma: \n Agar shart to'liq bajarilmagan bo'lsa bot to'g'ri ishlamaydi. Vzlomlangan 🟤Spinbetter ilovasidan foydalanish shart👇 \n\n1. Pastdagi tugma orqali vzlomlangan 🟤Spinbetter ilovasini yuklab oling. \n\n2. Vzlom Spinbetter ilovasida TOXA promokodi orqali yangidan ro'yhatdan o'ting.",
+      "link": "https://t.me/toxa_bonus/177"
+    }
+  ],
+  "messages": {
+    "start": "Botga xush kelibsiz! 👋\n\nIltimos barcha kanallarga obuna bo'ling va keyin TEKSHIRISH tugmasini bosing.",
+    "check_success": "🍎Apple of fortune o'yini vzlomini ishlatish uchun: \nPastdagi sizga qulay bo'lgan vzlomlangan ilovadan foydalaning👇. Bu yerda keltirilgan Xamma ilovada bot to'liq ishlaydi✅️",
+    "app_info_prefix": "",
+    "send_me_your_id": "",
+    "app_link_message": "📥 Vzlomlangan ilovani yuklash havolasi: ",
+    "congratulation_message_prefix": "🎉 Tabriklaymiz! Siz shartlarni muvaffaqiyatli bajardingiz!",
+    "random_message_prefix": "- katakni tanlang 🎯",
+    "help": "Qanday yordam berishimiz mumkin? 📞"
+  },
+  "button_labels": {
+    "check": "✅ Tekshirish",
+    "back": "🔙 Orqaga",
+    "next": "➡️ Keyingi qadam",
+    "generate": "🚀 Signal olish",
+    "help": "⚠️Qo'llanma"
+  }
+}
