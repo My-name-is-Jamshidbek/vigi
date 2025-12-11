@@ -33,17 +33,17 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     user_id = update.effective_user.id
     
     if not is_admin(user_id):
-        await update.message.reply_text("❌ You don't have permission to access the admin panel.")
+        await update.message.reply_text("❌ Siz admin panelga kirish huquqiga ega emassiz.")
         return -1
     
     keyboard = [
-        [InlineKeyboardButton("📤 Send Message to All Users", callback_data='admin_send_message')],
-        [InlineKeyboardButton("📊 View Statistics", callback_data='admin_view_stats')],
-        [InlineKeyboardButton("❌ Close", callback_data='admin_close')]
+        [InlineKeyboardButton("📤 Barcha foydalanuvchilarga xabar yuborish", callback_data='admin_send_message')],
+        [InlineKeyboardButton("📊 Statistikani ko'rish", callback_data='admin_view_stats')],
+        [InlineKeyboardButton("❌ Yopish", callback_data='admin_close')]
     ]
     
     await update.message.reply_text(
-        "👨‍💼 *Admin Panel*\n\nSelect an action:",
+        "👨‍💼 *Admin Panel*\n\nAmalni tanlang:",
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode='Markdown'
     )
@@ -59,12 +59,12 @@ async def admin_send_message_start(update: Update, context: ContextTypes.DEFAULT
     user_id = update.effective_user.id
     
     if not is_admin(user_id):
-        await query.answer("❌ You don't have permission.", show_alert=True)
+        await query.answer("❌ Siz ruxsati yo'q.", show_alert=True)
         return ADMIN_MENU
     
     await query.edit_message_text(
-        "📝 Send the message you want to forward to all users:\n\n"
-        "_Send /cancel to go back to admin panel_",
+        "📝 Barcha foydalanuvchilarga yuborish uchun xabar yuboring:\n\n"
+        "_Admin panelga qaytish uchun /cancel yuboring_",
         parse_mode='Markdown'
     )
     
@@ -84,13 +84,13 @@ async def admin_message_input(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # Show confirmation
     keyboard = [
-        [InlineKeyboardButton("✅ Confirm & Forward", callback_data='confirm_send_message')],
-        [InlineKeyboardButton("❌ Cancel", callback_data='admin_cancel_send')]
+        [InlineKeyboardButton("✅ Tasdiqlash va yuborish", callback_data='confirm_send_message')],
+        [InlineKeyboardButton("❌ Bekor qilish", callback_data='admin_cancel_send')]
     ]
     
     await update.message.reply_text(
-        "✅ Message received.\n\n"
-        "Do you want to forward this message to all users?",
+        "✅ Xabar qabul qilindi.\n\n"
+        "Siz bu xabarni barcha foydalanuvchilarga yubormoqchimisiz?",
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode='Markdown'
     )
@@ -106,20 +106,20 @@ async def confirm_and_send_message(update: Update, context: ContextTypes.DEFAULT
     user_id = update.effective_user.id
     
     if not is_admin(user_id):
-        await query.answer("❌ You don't have permission.", show_alert=True)
+        await query.answer("❌ Siz ruxsati yo'q.", show_alert=True)
         return ADMIN_MENU
     
     message = context.user_data.get('broadcast_message')
     
     if not message:
-        await query.edit_message_text("❌ No message found. Please try again.")
+        await query.edit_message_text("❌ Xabar topilmadi. Iltimos qayta urinib ko'ring.")
         return ADMIN_MENU
     
     # Get all users
     all_users = db.get_all_users()
     
     if not all_users:
-        await query.edit_message_text("⚠️ No users to send message to.")
+        await query.edit_message_text("⚠️ Xabar yuborish uchun foydalanuvchi yo'q.")
         return ADMIN_MENU
     
     # Send message to all users (without forwarding to hide sender)
@@ -127,8 +127,8 @@ async def confirm_and_send_message(update: Update, context: ContextTypes.DEFAULT
     failed_count = 0
     
     await query.edit_message_text(
-        f"📤 Sending message to {len(all_users)} users...\n"
-        f"Please wait..."
+        f"📤 {len(all_users)} ta foydalanuvchiga xabar yuborilmoqda...\n"
+        f"Iltimos kuting..."
     )
     
     for user in all_users:
@@ -237,15 +237,15 @@ async def confirm_and_send_message(update: Update, context: ContextTypes.DEFAULT
     
     # Show result
     result_text = (
-        f"✅ *Send Complete*\n\n"
-        f"📊 Results:\n"
-        f"✅ Successfully sent: {success_count}\n"
-        f"❌ Failed: {failed_count}\n"
-        f"👥 Total users: {len(all_users)}"
+        f"✅ *Yuborish Tamomlandi*\n\n"
+        f"📊 Natijalar:\n"
+        f"✅ Muvaffaqiyatli yuborildi: {success_count}\n"
+        f"❌ Xato: {failed_count}\n"
+        f"👥 Jami foydalanuvchilar: {len(all_users)}"
     )
     
     keyboard = [
-        [InlineKeyboardButton("🔙 Back to Admin Panel", callback_data='admin_back_to_panel')]
+        [InlineKeyboardButton("🔙 Admin Panelga Qaytish", callback_data='admin_back_to_panel')]
     ]
     
     await query.edit_message_text(
@@ -265,7 +265,7 @@ async def admin_view_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     user_id = update.effective_user.id
     
     if not is_admin(user_id):
-        await query.answer("❌ You don't have permission.", show_alert=True)
+        await query.answer("❌ Siz ruxsati yo'q.", show_alert=True)
         return ADMIN_MENU
     
     # Get statistics
@@ -278,13 +278,13 @@ async def admin_view_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     all_users = db.get_all_users()
     
     stats_text = (
-        f"📊 *Bot Statistics*\n\n"
-        f"👥 *User Stats:*\n"
-        f"• Total Users: {total_users}\n"
-        f"• Channel Joined: {channel_joined}\n"
-        f"• Active Users: {active_users}\n"
-        f"• ID Verified: {id_verified}\n"
-        f"• Not Verified: {total_users - id_verified}\n"
+        f"📊 *Bot Statistikasi*\n\n"
+        f"👥 *Foydalanuvchi Statistikasi:*\n"
+        f"• Jami Foydalanuvchilar: {total_users}\n"
+        f"• Kanalga Qo'shilganlar: {channel_joined}\n"
+        f"• Faol Foydalanuvchilar: {active_users}\n"
+        f"• ID Tasdiqlanganlar: {id_verified}\n"
+        f"• Tasdiqlanmaganlar: {total_users - id_verified}\n"
     )
     
     # Calculate join date stats
@@ -303,16 +303,16 @@ async def admin_view_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                           (now - datetime.fromisoformat(u.created_at)).days <= 7)
         
         stats_text += (
-            f"\n📅 *Join Stats:*\n"
-            f"• Today (All): {today_users}\n"
-            f"• This Week (All): {week_users}\n"
-            f"• Channel Today: {today_channel}\n"
-            f"• Channel This Week: {week_channel}\n"
+            f"\n📅 *Qo'shilish Statistikasi:*\n"
+            f"• Bugun (Hammasi): {today_users}\n"
+            f"• Bu Hafta (Hammasi): {week_users}\n"
+            f"• Kanal Bugun: {today_channel}\n"
+            f"• Kanal Bu Hafta: {week_channel}\n"
         )
     
     keyboard = [
-        [InlineKeyboardButton("🔙 Back to Admin Panel", callback_data='admin_back_to_panel')],
-        [InlineKeyboardButton("❌ Close", callback_data='admin_close')]
+        [InlineKeyboardButton("🔙 Admin Panelga Qaytish", callback_data='admin_back_to_panel')],
+        [InlineKeyboardButton("❌ Yopish", callback_data='admin_close')]
     ]
     
     await query.edit_message_text(
@@ -329,23 +329,23 @@ async def admin_back_to_panel(update: Update, context: ContextTypes.DEFAULT_TYPE
     query = update.callback_query
     
     keyboard = [
-        [InlineKeyboardButton("📤 Send Message to All Users", callback_data='admin_send_message')],
-        [InlineKeyboardButton("📊 View Statistics", callback_data='admin_view_stats')],
-        [InlineKeyboardButton("❌ Close", callback_data='admin_close')]
+        [InlineKeyboardButton("📤 Barcha foydalanuvchilarga xabar yuborish", callback_data='admin_send_message')],
+        [InlineKeyboardButton("📊 Statistikani ko'rish", callback_data='admin_view_stats')],
+        [InlineKeyboardButton("❌ Yopish", callback_data='admin_close')]
     ]
     
     if query:
         # Called from callback query
         await query.answer()
         await query.edit_message_text(
-            "👨‍💼 *Admin Panel*\n\nSelect an action:",
+            "👨‍💼 *Admin Panel*\n\nAmalni tanlang:",
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode='Markdown'
         )
     else:
         # Called from message (e.g., /cancel command)
         await update.message.reply_text(
-            "👨‍💼 *Admin Panel*\n\nSelect an action:",
+            "👨‍💼 *Admin Panel*\n\nAmalni tanlang:",
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode='Markdown'
         )
@@ -366,6 +366,6 @@ async def admin_close(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     query = update.callback_query
     await query.answer()
     
-    await query.edit_message_text("✅ Admin panel closed.")
+    await query.edit_message_text("✅ Admin panel yopildi.")
     
     return -1
