@@ -1,17 +1,17 @@
 {
-  "bot_token": "5346182572:AAFGj1wXBIYLsQcB052e38u2pd6qkvxgeXY",
+  "bot_token": "7614623856:AAH528EtiOB_UhfkRz4E_JWRig5dG7dEZHo",
   "channels": [
     {
       "id": 1,
       "name": "1-Kanal",
       "link": "https://t.me/+1Ac0rG7osfg5NGFi",
-      "chat_id": -1003380363288
+      "chat_id": -1001938578570
     },
     {
       "id": 2,
       "name": "2-Kanal",
       "link": "https://t.me/+lU7--JaQaFo3MTAy",
-      "chat_id": -1003409493204
+      "chat_id": -1002072356368
     }
   ],
   "apps": [

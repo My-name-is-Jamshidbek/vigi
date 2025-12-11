@@ -178,7 +178,7 @@ async def check_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Simulate subscription check (in production, actually check)
     is_subscribed = await bot.check_user_subscription(user_id)
     
-    if is_subscribed or True:  # Set True for testing
+    if is_subscribed: # or True:  # Set True for testing
         logger.info(f"User {user_id} verified subscription")
         await query.answer()
         await query.message.reply_text(
