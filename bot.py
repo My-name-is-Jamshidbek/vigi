@@ -2,7 +2,7 @@ import logging
 import json
 import random
 from pathlib import Path
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatMemberUpdated
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -11,9 +11,26 @@ from telegram.ext import (
     ConversationHandler,
     ContextTypes,
     filters,
+    ChatMemberHandler,
+    ChatJoinRequestHandler,
 )
 from telegram.error import TelegramError
 from database import db, User
+from admin import (
+    admin_panel,
+    admin_send_message_start,
+    admin_message_input,
+    confirm_and_send_message,
+    admin_view_stats,
+    admin_back_to_panel,
+    admin_cancel_send,
+    admin_close,
+    is_admin,
+    ADMIN_MENU,
+    SENDING_MESSAGE,
+    CONFIRMING_MESSAGE,
+    VIEWING_STATS,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -147,6 +164,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Start the bot and show channels"""
     user = update.effective_user
     logger.info(f"User {user.id} started the bot")
+    
+    # Check if user is admin
+    if is_admin(user.id):
+        return await admin_panel(update, context)
     
     # Save or update user in database
     if not db.user_exists(user.id):
@@ -338,6 +359,59 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     return ConversationHandler.END
 
+async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle channel join requests"""
+    chat_join_request = update.chat_join_request
+    
+    if not chat_join_request:
+        return
+    
+    # Check if auto approve is enabled
+    if not config.get('features', {}).get('auto_approve_channel_join', True):
+        logger.info(f"Channel join request from user {chat_join_request.from_user.id} - auto approve disabled")
+        return
+    
+    user_id = chat_join_request.from_user.id
+    user_name = chat_join_request.from_user.full_name or "User"
+    chat_id = chat_join_request.chat.id
+    
+    logger.info(f"Join request received from user {user_id} ({user_name}) for chat {chat_id}")
+    
+    try:
+        # Approve the join request
+        await context.bot.approve_chat_join_request(
+            chat_id=chat_id,
+            user_id=user_id
+        )
+        logger.info(f"✅ Approved join request for user {user_id} in chat {chat_id}")
+        
+        # Add user to database if not exists
+        if not db.user_exists(user_id):
+            new_user = User(
+                telegram_id=user_id,
+                fullname=user_name,
+                status="channel_joined"
+            )
+            db.create_user(new_user)
+            logger.info(f"New user added from channel join: {user_id}")
+        else:
+            db.update_user(user_id, status="channel_joined")
+            logger.info(f"Updated user {user_id} status to channel_joined")
+        
+        # Send congratulation message to user
+        try:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=config['messages']['channel_join_approved'],
+                parse_mode='Markdown'
+            )
+            logger.info(f"Sent welcome message to user {user_id}")
+        except Exception as e:
+            logger.error(f"Could not send message to user {user_id}: {e}")
+            
+    except Exception as e:
+        logger.error(f"Error approving join request for user {user_id}: {e}")
+
 def main():
     """Start the bot"""
     # Create the Application
@@ -346,7 +420,7 @@ def main():
     # Store application in bot instance for subscription checks
     bot.application = application
     
-    # Create conversation handler
+    # Create conversation handler for regular users
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
@@ -366,7 +440,42 @@ def main():
         fallbacks=[CommandHandler('cancel', cancel)],
     )
     
+    # Create conversation handler for admin
+    admin_conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            ADMIN_MENU: [
+                CallbackQueryHandler(admin_send_message_start, pattern='^admin_send_message$'),
+                CallbackQueryHandler(admin_view_stats, pattern='^admin_view_stats$'),
+                CallbackQueryHandler(admin_back_to_panel, pattern='^admin_back_to_panel$'),
+                CallbackQueryHandler(admin_close, pattern='^admin_close$'),
+            ],
+            SENDING_MESSAGE: [
+                MessageHandler(
+                    (filters.TEXT | filters.PHOTO | filters.VIDEO | 
+                     filters.AUDIO | filters.ANIMATION | filters.VOICE | filters.VIDEO_NOTE | filters.LOCATION | filters.CONTACT | filters.VENUE |
+                     filters.POLL | filters.GAME) & ~filters.COMMAND,
+                    admin_message_input
+                ),
+                CommandHandler('cancel', admin_back_to_panel),
+            ],
+            CONFIRMING_MESSAGE: [
+                CallbackQueryHandler(confirm_and_send_message, pattern='^confirm_send_message$'),
+                CallbackQueryHandler(admin_cancel_send, pattern='^admin_cancel_send$'),
+            ],
+            VIEWING_STATS: [
+                CallbackQueryHandler(admin_back_to_panel, pattern='^admin_back_to_panel$'),
+                CallbackQueryHandler(admin_close, pattern='^admin_close$'),
+            ],
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+    )
+    
+    application.add_handler(admin_conv_handler)
     application.add_handler(conv_handler)
+    
+    # Add handler for channel join requests
+    application.add_handler(ChatJoinRequestHandler(handle_chat_join_request))
     
     # Run the bot
     logger.info("Bot started polling...")
