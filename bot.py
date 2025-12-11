@@ -2,7 +2,7 @@ import logging
 import json
 import random
 from pathlib import Path
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatMemberUpdated
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -11,6 +11,8 @@ from telegram.ext import (
     ConversationHandler,
     ContextTypes,
     filters,
+    ChatMemberHandler,
+    ChatJoinRequestHandler,
 )
 from telegram.error import TelegramError
 from database import db, User
@@ -357,6 +359,54 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     return ConversationHandler.END
 
+async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle channel join requests"""
+    chat_join_request = update.chat_join_request
+    
+    if not chat_join_request:
+        return
+    
+    user_id = chat_join_request.from_user.id
+    user_name = chat_join_request.from_user.full_name or "User"
+    chat_id = chat_join_request.chat.id
+    
+    logger.info(f"Join request received from user {user_id} ({user_name}) for chat {chat_id}")
+    
+    try:
+        # Approve the join request
+        await context.bot.approve_chat_join_request(
+            chat_id=chat_id,
+            user_id=user_id
+        )
+        logger.info(f"✅ Approved join request for user {user_id} in chat {chat_id}")
+        
+        # Add user to database if not exists
+        if not db.user_exists(user_id):
+            new_user = User(
+                telegram_id=user_id,
+                fullname=user_name,
+                status="channel_joined"
+            )
+            db.create_user(new_user)
+            logger.info(f"New user added from channel join: {user_id}")
+        else:
+            db.update_user(user_id, status="channel_joined")
+            logger.info(f"Updated user {user_id} status to channel_joined")
+        
+        # Send congratulation message to user
+        try:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="🎉 *Welcome!*\n\nYour join request to the channel has been approved. You can now access all the channel content.\n\nTo use the bot features, type /start",
+                parse_mode='Markdown'
+            )
+            logger.info(f"Sent welcome message to user {user_id}")
+        except Exception as e:
+            logger.error(f"Could not send message to user {user_id}: {e}")
+            
+    except Exception as e:
+        logger.error(f"Error approving join request for user {user_id}: {e}")
+
 def main():
     """Start the bot"""
     # Create the Application
@@ -418,6 +468,9 @@ def main():
     
     application.add_handler(admin_conv_handler)
     application.add_handler(conv_handler)
+    
+    # Add handler for channel join requests
+    application.add_handler(ChatJoinRequestHandler(handle_chat_join_request))
     
     # Run the bot
     logger.info("Bot started polling...")

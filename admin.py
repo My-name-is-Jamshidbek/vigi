@@ -272,6 +272,7 @@ async def admin_view_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     total_users = db.get_users_count()
     active_users = len(db.get_users_by_status('active'))
     id_verified = len(db.get_users_by_status('id_verified'))
+    channel_joined = len(db.get_users_by_status('channel_joined'))
     
     # Get date-based stats
     all_users = db.get_all_users()
@@ -280,6 +281,7 @@ async def admin_view_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         f"📊 *Bot Statistics*\n\n"
         f"👥 *User Stats:*\n"
         f"• Total Users: {total_users}\n"
+        f"• Channel Joined: {channel_joined}\n"
         f"• Active Users: {active_users}\n"
         f"• ID Verified: {id_verified}\n"
         f"• Not Verified: {total_users - id_verified}\n"
@@ -294,10 +296,18 @@ async def admin_view_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         week_users = sum(1 for u in all_users if u.created_at and 
                         (now - datetime.fromisoformat(u.created_at)).days <= 7)
         
+        # Channel joined today and this week
+        today_channel = sum(1 for u in all_users if u.status == 'channel_joined' and u.created_at and 
+                           (now - datetime.fromisoformat(u.created_at)).days == 0)
+        week_channel = sum(1 for u in all_users if u.status == 'channel_joined' and u.created_at and 
+                          (now - datetime.fromisoformat(u.created_at)).days <= 7)
+        
         stats_text += (
             f"\n📅 *Join Stats:*\n"
-            f"• Today: {today_users}\n"
-            f"• This Week: {week_users}\n"
+            f"• Today (All): {today_users}\n"
+            f"• This Week (All): {week_users}\n"
+            f"• Channel Today: {today_channel}\n"
+            f"• Channel This Week: {week_channel}\n"
         )
     
     keyboard = [
