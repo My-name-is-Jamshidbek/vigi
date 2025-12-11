@@ -4,6 +4,7 @@
   "features": {
     "auto_approve_channel_join": false
   },
+  "channels": [
     {
       "id": 1,
       "name": "1-Kanal",
