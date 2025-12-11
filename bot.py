@@ -14,6 +14,21 @@ from telegram.ext import (
 )
 from telegram.error import TelegramError
 from database import db, User
+from admin import (
+    admin_panel,
+    admin_send_message_start,
+    admin_message_input,
+    confirm_and_send_message,
+    admin_view_stats,
+    admin_back_to_panel,
+    admin_cancel_send,
+    admin_close,
+    is_admin,
+    ADMIN_MENU,
+    SENDING_MESSAGE,
+    CONFIRMING_MESSAGE,
+    VIEWING_STATS,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -147,6 +162,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Start the bot and show channels"""
     user = update.effective_user
     logger.info(f"User {user.id} started the bot")
+    
+    # Check if user is admin
+    if is_admin(user.id):
+        return await admin_panel(update, context)
     
     # Save or update user in database
     if not db.user_exists(user.id):
@@ -346,7 +365,7 @@ def main():
     # Store application in bot instance for subscription checks
     bot.application = application
     
-    # Create conversation handler
+    # Create conversation handler for regular users
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
@@ -366,6 +385,38 @@ def main():
         fallbacks=[CommandHandler('cancel', cancel)],
     )
     
+    # Create conversation handler for admin
+    admin_conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            ADMIN_MENU: [
+                CallbackQueryHandler(admin_send_message_start, pattern='^admin_send_message$'),
+                CallbackQueryHandler(admin_view_stats, pattern='^admin_view_stats$'),
+                CallbackQueryHandler(admin_back_to_panel, pattern='^admin_back_to_panel$'),
+                CallbackQueryHandler(admin_close, pattern='^admin_close$'),
+            ],
+            SENDING_MESSAGE: [
+                MessageHandler(
+                    (filters.TEXT | filters.PHOTO | filters.VIDEO | 
+                     filters.AUDIO | filters.ANIMATION | filters.VOICE | filters.VIDEO_NOTE | filters.LOCATION | filters.CONTACT | filters.VENUE |
+                     filters.POLL | filters.GAME) & ~filters.COMMAND,
+                    admin_message_input
+                ),
+                CommandHandler('cancel', admin_back_to_panel),
+            ],
+            CONFIRMING_MESSAGE: [
+                CallbackQueryHandler(confirm_and_send_message, pattern='^confirm_send_message$'),
+                CallbackQueryHandler(admin_cancel_send, pattern='^admin_cancel_send$'),
+            ],
+            VIEWING_STATS: [
+                CallbackQueryHandler(admin_back_to_panel, pattern='^admin_back_to_panel$'),
+                CallbackQueryHandler(admin_close, pattern='^admin_close$'),
+            ],
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+    )
+    
+    application.add_handler(admin_conv_handler)
     application.add_handler(conv_handler)
     
     # Run the bot

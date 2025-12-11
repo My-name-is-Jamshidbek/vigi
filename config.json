@@ -1,5 +1,6 @@
 {
   "bot_token": "5346182572:AAFGj1wXBIYLsQcB052e38u2pd6qkvxgeXY",
+  "admin_ids": [2081653869, 6855636142],
   "channels": [
     {
       "id": 1,
