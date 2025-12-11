@@ -366,6 +366,11 @@ async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT
     if not chat_join_request:
         return
     
+    # Check if auto approve is enabled
+    if not config.get('features', {}).get('auto_approve_channel_join', True):
+        logger.info(f"Channel join request from user {chat_join_request.from_user.id} - auto approve disabled")
+        return
+    
     user_id = chat_join_request.from_user.id
     user_name = chat_join_request.from_user.full_name or "User"
     chat_id = chat_join_request.chat.id
