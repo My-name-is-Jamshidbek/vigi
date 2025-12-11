@@ -49,7 +49,8 @@
     "app_link_message": "📥 Vzlomlangan ilovani yuklash havolasi: ",
     "congratulation_message_prefix": "🎉 Tabriklaymiz! Siz shartlarni muvaffaqiyatli bajardingiz!",
     "random_message_prefix": "- katakni tanlang 🎯",
-    "help": "Qanday yordam berishimiz mumkin? 📞"
+    "help": "Qanday yordam berishimiz mumkin? 📞",
+    "channel_join_approved": "🎉 Xush Kelibsiz!\n\nSizning kanal qo'shilish so'rovingiz tasdiqlandi. Endi siz kanal kontentiga kirish huquqiga egasiz.\n\nBotning xususiyatlaridan foydalanish uchun /start buyrug'ini yuboring"
   },
   "button_labels": {
     "check": "✅ Tekshirish",

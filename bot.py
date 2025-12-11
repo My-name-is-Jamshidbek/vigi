@@ -397,7 +397,7 @@ async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT
         try:
             await context.bot.send_message(
                 chat_id=user_id,
-                text="🎉 *Welcome!*\n\nYour join request to the channel has been approved. You can now access all the channel content.\n\nTo use the bot features, type /start",
+                text=config['messages']['channel_join_approved'],
                 parse_mode='Markdown'
             )
             logger.info(f"Sent welcome message to user {user_id}")
